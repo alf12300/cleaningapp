@@ -1,0 +1,40 @@
+/* styles.css */
+
+/* Body */
+body {
+    background-color: #000000;
+}
+
+
+
+/* Progress Bar */
+[data-testid="stProgressBar"] > div > div {
+    background-color: #00FF00;
+}
+
+[data-testid="stProgressBar"] > div {
+    background-color: #000000;
+    border: 1px solid #00FF00;
+}
+
+/* Checkbox */
+.stCheckbox > label {
+    color: #00FF00;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Tooltips and Hover Effects */
+a:hover, button:hover, .stCheckbox > label:hover {
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #000000;
+}
+
