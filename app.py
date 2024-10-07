@@ -107,33 +107,48 @@ def calculate_statistics():
     df['Date'] = pd.to_datetime(df['Date'])
     df['Completed'] = df['Completed'].astype(int)
 
-    # Total tasks and completed tasks
-    total_tasks = len(df)
-    completed_tasks = df['Completed'].sum()
+    # Get unique dates from progress data
+    dates = df['Date'].unique()
 
-    # Overall completion rate
-    overall_completion_rate = (completed_tasks / total_tasks) * 100 if total_tasks > 0 else 0
+    # Prepare DataFrame for total tasks assigned per date
+    date_tasks = []
+    for date in dates:
+        date_obj = pd.to_datetime(date)
+        day_name = date_obj.strftime('%A')
+        total_tasks_assigned = len(get_tasks(day_name))
+        date_tasks.append({'Date': date, 'Total_Tasks_Assigned': total_tasks_assigned})
+
+    df_date_tasks = pd.DataFrame(date_tasks)
+    df_date_tasks['Date'] = pd.to_datetime(df_date_tasks['Date'])
+
+    # Merge df with df_date_tasks
+    df = df.merge(df_date_tasks, on='Date', how='left')
 
     # Daily completion rates
-    daily_stats = df.groupby('Date').agg({'Completed': ['sum', 'count']})
+    daily_stats = df.groupby('Date').agg({'Completed': 'sum', 'Total_Tasks_Assigned': 'max'})
     daily_stats.columns = ['Completed_Tasks', 'Total_Tasks']
     daily_stats['Daily_Completion_Rate'] = (daily_stats['Completed_Tasks'] / daily_stats['Total_Tasks']) * 100
 
+    # Overall Statistics
+    total_tasks = daily_stats['Total_Tasks'].sum()
+    completed_tasks = daily_stats['Completed_Tasks'].sum()
+    overall_completion_rate = (completed_tasks / total_tasks) * 100 if total_tasks > 0 else 0
+
     # Weekly completion rates
-    df['Week'] = df['Date'].dt.isocalendar().week.astype(int)  # Convert to int
-    weekly_stats = df.groupby('Week').agg({'Completed': ['sum', 'count']})
+    df['Week'] = df['Date'].dt.isocalendar().week.astype(int)
+    weekly_stats = df.groupby('Week').agg({'Completed': 'sum', 'Total_Tasks_Assigned': 'sum'})
     weekly_stats.columns = ['Completed_Tasks', 'Total_Tasks']
     weekly_stats['Weekly_Completion_Rate'] = (weekly_stats['Completed_Tasks'] / weekly_stats['Total_Tasks']) * 100
 
     # Day-wise performance
     df['Day_Name'] = df['Date'].dt.day_name()
-    daywise_stats = df.groupby('Day_Name').agg({'Completed': ['sum', 'count']})
+    daywise_stats = df.groupby('Day_Name').agg({'Completed': 'sum', 'Total_Tasks_Assigned': 'sum'})
     daywise_stats.columns = ['Completed_Tasks', 'Total_Tasks']
     daywise_stats['Daywise_Completion_Rate'] = (daywise_stats['Completed_Tasks'] / daywise_stats['Total_Tasks']) * 100
     daywise_stats = daywise_stats.reindex(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
 
-    # Prepare data for heatmap (optional)
-    heatmap_data = df.groupby(['Date', 'Day_Name']).agg({'Completed': ['sum', 'count']})
+    # Prepare data for heatmap
+    heatmap_data = df.groupby(['Date', 'Day_Name']).agg({'Completed': 'sum', 'Total_Tasks_Assigned': 'max'})
     heatmap_data.columns = ['Completed_Tasks', 'Total_Tasks']
     heatmap_data.reset_index(inplace=True)
 
