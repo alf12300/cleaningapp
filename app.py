@@ -308,7 +308,7 @@ def show_today_tasks():
     if st.button("Reset Today's Progress"):
         reset_progress(date_str)
         st.success("Today's progress has been reset.")
-        st.experimental_rerun()
+        st.rerun()
 
     total_tasks = len(tasks)
 
@@ -363,7 +363,7 @@ def show_settings():
             if col2.button("Delete", key=f"delete_{task_id}"):
                 delete_task(task_id)
                 st.success("Task deleted successfully.")
-                st.experimental_rerun()
+                st.rerun()
     else:
         st.info(f"No tasks for {selected_day}")
 
@@ -373,7 +373,7 @@ def show_settings():
         if new_task.strip() != "":
             add_task(selected_day, new_task.strip())
             st.success("Task added successfully!")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.warning("Task description cannot be empty.")
 
